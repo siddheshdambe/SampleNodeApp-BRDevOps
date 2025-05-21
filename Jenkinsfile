@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Clone') {
       steps {
-        git url: 'https://github.com/your-username/your-node-app.git', branch: 'main'
+        git url: 'https://github.com/siddheshdambe/SampleNodeApp-BRDevOps.git', branch: 'main'
       }
     }
 
@@ -21,7 +21,7 @@ pipeline {
     stage('Test') {
       steps {
         echo 'Running tests...'
-        sh 'npm test || echo "Tests failed (skip for demo)"'
+        sh 'npm test || echo "Tests failed"'
       }
     }
 
