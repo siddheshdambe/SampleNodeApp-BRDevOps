@@ -1,31 +1,34 @@
 pipeline {
-  agent any
+    agent any
 
-  tools {
-    nodejs 'NodeJS-18' // Must match what you configured
+    environment {
+      NETLIFY_AUTH_TOKEN = credentials('NETLIFY_AUTH_TOKEN')
+      NETLIFY_SITE_ID = credentials('NETLIFY_SITE_ID')
   }
 
-  stages {
-    stage('Install dependencies') {
-      steps {
-        bat 'npm install'
-      }
-    }
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/siddheshdambe/SampleNodeApp-BRDevOps.git'
+            }
+        }
 
-    stage('Run application') {
-      steps {
-        bat 'start "NodeApp" cmd /c "node index.js"'
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
 
-        bat 'ping 127.0.0.1 -n 60 > nul'
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
 
-        bat 'taskkill /F /IM node.exe || echo Node was already stopped'
-      }
+        stage('Deploy to Netlify') {
+            steps {
+                sh 'npx netlify deploy --prod --auth $NETLIFY_AUTH_TOKEN --site $NETLIFY_SITE_ID'
+            }
+        }
     }
-    
-      stage('Build complete') {
-      steps {
-        echo 'Build completed successfully.'
-      }
-    }
-  }
 }
