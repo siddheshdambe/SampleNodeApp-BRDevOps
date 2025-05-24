@@ -1,55 +1,31 @@
 pipeline {
     agent any
-
+ 
     environment {
-      NETLIFY_AUTH_TOKEN = credentials('NETLIFY_AUTH_TOKEN')
-      NETLIFY_SITE_ID = credentials('NETLIFY_SITE_ID')
+        NETLIFY_AUTH_TOKEN = credentials('NETLIFY_AUTH_TOKEN')
+        NETLIFY_SITE_ID = credentials('NETLIFY_SITE_ID')
+        PUBLISH_DIRECTORY = 'build'
     }
-
+ 
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
-                git branch: 'main', url: 'https://github.com/siddheshdambe/SampleNodeApp-BRDevOps.git'
+                script {
+                    bat 'npm install'
+                    bat 'npm run build'
+                }
             }
         }
-
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-
-        stage('Install Netlify CLI') {
-            steps {
-                sh 'npm install -g netlify-cli'
-            }
-        }
-
-        stage('Build Project') {
-            steps {
-                // Skip or update this if your app doesn’t need to be built
-                sh 'npm run build'
-            }
-        }
-
+ 
+ 
         stage('Deploy to Netlify') {
             steps {
-                sh '''
-                    netlify deploy --prod \
-                    --dir=build \
-                    --site=$NETLIFY_SITE_ID \
-                    --auth=$NETLIFY_AUTH_TOKEN
-                '''
+                script {
+                    bat 'npm install -g netlify-cli'
+                    bat 'netlify login --auth %NETLIFY_AUTH_TOKEN%'
+                    bat 'netlify deploy --prod -s %SITE_ID% --dir=%PUBLISH_DIRECTORY%'
+                }
             }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Deployment to Netlify successful!'
-        }
-        failure {
-            echo '❌ Deployment failed. Check the logs above.'
         }
     }
 }
