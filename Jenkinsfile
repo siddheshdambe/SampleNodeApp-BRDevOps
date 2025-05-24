@@ -2,14 +2,16 @@ pipeline {
     agent any
 
     environment {
-      NETLIFY_AUTH_TOKEN = credentials('NETLIFY_AUTH_TOKEN')
-      NETLIFY_SITE_ID = credentials('NETLIFY_SITE_ID')
-  }
+        // Netlify Personal Access Token stored in Jenkins Credentials
+        NETLIFY_AUTH_TOKEN = credentials('netlify-auth-token')
+        // Replace this with your actual Netlify site ID
+        NETLIFY_SITE_ID = 'your-netlify-site-id'
+    }
 
     stages {
-        stage('Clone Repo') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/siddheshdambe/SampleNodeApp-BRDevOps.git'
+                git branch: 'main', url: 'https://github.com/siddheshdambe/SampleNodeApp-BRDevOps.git'
             }
         }
 
@@ -19,16 +21,37 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Install Netlify CLI') {
             steps {
+                sh 'npm install -g netlify-cli'
+            }
+        }
+
+        stage('Build Project') {
+            steps {
+                // Skip or update this if your app doesn’t need to be built
                 sh 'npm run build'
             }
         }
 
         stage('Deploy to Netlify') {
             steps {
-                sh 'npx netlify deploy --prod --auth $NETLIFY_AUTH_TOKEN --site $NETLIFY_SITE_ID'
+                sh '''
+                    netlify deploy --prod \
+                    --dir=build \
+                    --site=$NETLIFY_SITE_ID \
+                    --auth=$NETLIFY_AUTH_TOKEN
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Deployment to Netlify successful!'
+        }
+        failure {
+            echo '❌ Deployment failed. Check the logs above.'
         }
     }
 }
