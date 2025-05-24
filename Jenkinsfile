@@ -2,10 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Netlify Personal Access Token stored in Jenkins Credentials
-        NETLIFY_AUTH_TOKEN = credentials('netlify-auth-token')
-        // Replace this with your actual Netlify site ID
-        NETLIFY_SITE_ID = 'your-netlify-site-id'
+      NETLIFY_AUTH_TOKEN = credentials('NETLIFY_AUTH_TOKEN')
+      NETLIFY_SITE_ID = credentials('NETLIFY_SITE_ID')
     }
 
     stages {
